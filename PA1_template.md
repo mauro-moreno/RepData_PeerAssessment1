@@ -1,15 +1,11 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 ## Dependencies for the project
 
 Include libraries for data manipulation and plotting.
 
-```{r results='hide', message=FALSE}
+
+```r
 # install.packages(c('dplyr', 'ggplot2', 'chron'))
 library('dplyr')
 library('ggplot2')
@@ -20,7 +16,8 @@ library('chron')
 
 Check if file exists or unzip **activity.zip** file.
 
-```{r}
+
+```r
 if (file.exists('activity.csv') == FALSE) {
     unzip('activity.zip')
 }
@@ -28,7 +25,8 @@ if (file.exists('activity.csv') == FALSE) {
 
 Check if variable already created or read the **activity.csv** file.
 
-```{r cache=TRUE}
+
+```r
 if (exists('activity_data') == FALSE) {
     activity_data <- read.csv('activity.csv')
 }
@@ -36,7 +34,8 @@ if (exists('activity_data') == FALSE) {
 
 Format date.
 
-```{r}
+
+```r
 activity_data$date = as.Date(as.character(activity_data$date))
 ```
 
@@ -44,7 +43,8 @@ activity_data$date = as.Date(as.character(activity_data$date))
 
 Group data and calculate total of steps per date.
 
-```{r}
+
+```r
 by_day_activity_data <- summarise(
     group_by(activity_data, date),
     sum(steps, na.rm=TRUE))
@@ -53,7 +53,8 @@ names(by_day_activity_data) <- c('Date', 'Steps')
 
 Plot histogram total of steps per date.
 
-```{r}
+
+```r
 plot1 <- ggplot(by_day_activity_data, aes(x=Date, y=Steps)) +
     geom_bar(stat='identity') +
     geom_hline(aes(yintercept = mean(Steps)), col = 'blue') +
@@ -61,23 +62,36 @@ plot1 <- ggplot(by_day_activity_data, aes(x=Date, y=Steps)) +
 print(plot1)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
 Mean total number of steps per date.
 
-```{r}
+
+```r
 mean(by_day_activity_data$Steps, na.rm = TRUE)
+```
+
+```
+## [1] 9354.23
 ```
 
 Median total number of steps per date.
 
-```{r}
+
+```r
 median(by_day_activity_data$Steps, na.rm = TRUE)
+```
+
+```
+## [1] 10395
 ```
 
 ## What is the average daily activity pattern?
 
 Group data and calculate total of steps per interval.
 
-```{r}
+
+```r
 by_interval_activity_data <- summarise(
     group_by(activity_data, interval),
     mean(steps, na.rm=TRUE))
@@ -86,30 +100,48 @@ names(by_interval_activity_data) <- c('Interval', 'Steps')
 
 Plot time serie average of steps by per interval.
 
-```{r}
+
+```r
 plot2 <- ggplot(by_interval_activity_data, aes(x=Interval, y=Steps)) +
     geom_line()
 print(plot2)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+
 Max number of average of steps on a 5 minute interval.
 
-```{r}
+
+```r
 max_steps_by_interval <- which.max(by_interval_activity_data$Steps)
 by_interval_activity_data[max_steps_by_interval, ]
+```
+
+```
+## Source: local data frame [1 x 2]
+## 
+##   Interval    Steps
+##      (int)    (dbl)
+## 1      835 206.1698
 ```
 
 ## Imputing missing values
 
 Total missing values.
 
-```{r}
+
+```r
 sum(is.na(activity_data$steps))
+```
+
+```
+## [1] 2304
 ```
 
 Use mean of interval as integer for imputing missing values.
 
-```{r}
+
+```r
 activity_imputed_data <- activity_data
 activity_imputed_data$steps <- with(
     activity_imputed_data,
@@ -125,7 +157,8 @@ activity_imputed_data$steps <- with(
 
 Group data and calculate total of steps per date.
 
-```{r}
+
+```r
 by_day_activity_imputed_data <- summarise(
     group_by(activity_imputed_data, date),
     sum(steps, na.rm=TRUE))
@@ -134,7 +167,8 @@ names(by_day_activity_imputed_data) <- c('Date', 'Steps')
 
 Plot histogram total of steps per date.
 
-```{r}
+
+```r
 plot3 <- ggplot(by_day_activity_imputed_data, aes(x=Date, y=Steps)) +
     geom_bar(stat='identity') +
     geom_hline(aes(yintercept = mean(Steps)), col = 'blue') +
@@ -142,25 +176,52 @@ plot3 <- ggplot(by_day_activity_imputed_data, aes(x=Date, y=Steps)) +
 print(plot3)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-15-1.png) 
+
 Mean total number of steps per date compared with not imputted data.
 
-```{r}
+
+```r
 mean(by_day_activity_imputed_data$Steps, na.rm = TRUE)
+```
+
+```
+## [1] 10749.77
+```
+
+```r
 mean(by_day_activity_data$Steps, na.rm = TRUE)
+```
+
+```
+## [1] 9354.23
 ```
 
 Median total number of steps per date compared with not imputted data.
 
-```{r}
+
+```r
 median(by_day_activity_imputed_data$Steps, na.rm = TRUE)
+```
+
+```
+## [1] 10641
+```
+
+```r
 median(by_day_activity_data$Steps, na.rm = TRUE)
+```
+
+```
+## [1] 10395
 ```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 Add weekend / weekday factor.
 
-```{r}
+
+```r
 activity_imputed_data <- mutate(
     activity_imputed_data,
     week = ifelse(
@@ -174,7 +235,8 @@ activity_imputed_data$week <- as.factor(activity_imputed_data$week)
 
 Group data by weekday and calculate total of steps per interval.
 
-```{r}
+
+```r
 by_interval_activity_weekday_data <- activity_imputed_data %>%
     group_by(week, interval) %>%
     select(week, interval, steps) %>%
@@ -185,7 +247,8 @@ names(by_interval_activity_weekday_data) <-
 
 Plot time serie average of steps by per interval separated by weekend and weekday.
 
-```{r}
+
+```r
 plot4 <- ggplot(
         by_interval_activity_weekday_data,
         aes(x=Interval, y=Steps)) +
@@ -193,3 +256,5 @@ plot4 <- ggplot(
     geom_line()
 print(plot4)
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-20-1.png) 
